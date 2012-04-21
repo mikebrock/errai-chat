@@ -1,0 +1,3 @@
+org.cdidemo2.client.shared.Authenticated
+org.cdidemo2.client.local.ChatClient
+org.cdidemo2.server.ChatSatellite

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Errai Application</title>
+    <link rel="stylesheet" type="text/css" href="App.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css"/>
+    <script type="text/javascript" src="app/app.nocache.js"></script>
+
+    <style type="text/css" media="screen">
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%; /* this is the key! */
+        }
+
+        #left {
+            position: absolute;
+            left: 0;
+            top: 0;
+            padding: 0;
+            width: 200px;
+            height: 100%; /* works only if parent container is assigned a height value */
+            color: #333;
+            background: #eaeaea;
+            border: 1px solid #333;
+        }
+
+        .content {
+            margin-left: 220px;
+            margin-right: 220px;
+            margin-bottom: 20px;
+            color: #333;
+            background: #ffc;
+            border: 1px solid #333;
+            padding: 0 10px;
+        }
+
+        #right {
+            position: absolute;
+            right: 0;
+            top: 0;
+            padding: 0;
+            width: 200px;
+            height: 100%; /* works only if parent container is assigned a height value */
+            color: #333;
+            background: #eaeaea;
+            border: 1px solid #333;
+        }
+
+        #left p {
+            padding: 0 10px;
+        }
+
+        #right p {
+            padding: 0 10px;
+        }
+
+        p.top {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="rootPanel"></div>
+
+</body>
+</html>
