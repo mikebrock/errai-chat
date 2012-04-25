@@ -5,7 +5,7 @@
 		  http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
          version="2.5">
 
-
+<!--
     <context-param>
         <param-name>websockets-enabled</param-name>
         <param-value>true</param-value>
@@ -30,7 +30,7 @@
         <servlet-name>ErraiWSServlet</servlet-name>
         <url-pattern>*.erraiBusWS</url-pattern>
     </servlet-mapping>
-
+-->
     <servlet>
         <servlet-name>ErraiServlet</servlet-name>
         <servlet-class>org.jboss.errai.bus.server.servlet.DefaultBlockingServlet</servlet-class>

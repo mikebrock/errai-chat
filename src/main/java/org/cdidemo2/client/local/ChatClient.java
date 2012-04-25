@@ -39,12 +39,15 @@ public class ChatClient {
 
   @AfterInitialization
   private void onLoad() {
+    Notifications.initFocusTracking();
+
     chatLogin.addOnClickCallback(new Runnable() {
       @Override
       public void run() {
         clientLoginEvent.fire(new ClientLogin(chatLogin.getNick()));
       }
     });
+    chatLogin.setVisible(false);
     rootPanel.add(chatLogin);
 
     Window.addResizeHandler(new ResizeHandler() {

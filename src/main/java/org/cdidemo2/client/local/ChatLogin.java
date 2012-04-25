@@ -49,10 +49,15 @@ public class ChatLogin extends Composite {
 
   @UiHandler("goButton")
   void onGoButtonClick(ClickEvent event) {
-    for (Runnable runnable : onClick) {
-      runnable.run();
-    }
-    setVisible(false);
+    Notifications.ensurePermissions(new Runnable() {
+      @Override
+      public void run() {
+        setVisible(false);
+        for (Runnable runnable : onClick) {
+          runnable.run();
+        }
+      }
+    });
   }
 
   public String getNick() {
