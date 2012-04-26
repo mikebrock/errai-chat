@@ -7,6 +7,7 @@ public class User {
   private final static long TIMEOUT = 1000 * 60;
   private final String nick;
   private final String sessionId;
+  private boolean operator;
   private long lastActivity = System.currentTimeMillis();
 
   public User(final String nick, final String sessionId) {
@@ -20,6 +21,14 @@ public class User {
 
   public String getSessionId() {
     return sessionId;
+  }
+
+  public boolean isOperator() {
+    return operator;
+  }
+
+  public void setOperator(boolean operator) {
+    this.operator = operator;
   }
 
   public void activity() {

@@ -18,9 +18,14 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.Widget;
+import org.cdidemo2.client.shared.Action;
+import org.cdidemo2.client.shared.ActionMessage;
+import org.cdidemo2.client.shared.AdminAction;
+import org.cdidemo2.client.shared.AdminAuth;
 import org.cdidemo2.client.shared.ChatMessage;
 import org.cdidemo2.client.shared.Client;
 import org.jboss.errai.common.client.util.LogUtil;
+import sun.net.idn.StringPrep;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.event.Event;
@@ -42,6 +47,10 @@ public class ChatBox extends Composite {
   @UiField Button sendMessage;
 
   @Inject @Client Event<ChatMessage> chatMessageEvent;
+  @Inject @Client Event<ActionMessage> actionMessageEvent;
+  @Inject Event<AdminAuth> adminAuthEvent;
+  @Inject Event<AdminAction> adminActionEvent;
+
   @Inject SessionData sessionData;
 
   @PostConstruct
@@ -66,11 +75,32 @@ public class ChatBox extends Composite {
         Notifications.notify(nick + " mentioned you", message);
       }
 
-      appendItem(new HTML("<div style='background-color: #eaeaea; width:100%;'><strong>" + sanitizeHtml(nick).asString() + "</strong>: "
+      appendItem(new HTML("<div style='background-color: #eaeaea; width:100%;'><strong>"
+              + sanitizeHtml(nick).asString() + "</strong>: "
               + sanitizeHtml(message).asString() + "</div>").getElement());
     }
     else {
-      appendItem(new HTML("<strong>" + sanitizeHtml(nick).asString() + "</strong>: " + sanitizeHtml(message).asString()
+      appendItem(new HTML("<strong>" + sanitizeHtml(nick).asString() + "</strong>: "
+              + sanitizeHtml(message).asString()
+              + "<br/>").getElement());
+    }
+  }
+
+  public void addActionMessage(final String nick, final String message) {
+    if (sessionData.getNickName().equals(nick)) return;
+
+    if (message.contains(sessionData.getNickName())) {
+      if (!Notifications.hasFocus()) {
+        Notifications.notify(nick + " mentioned you", message);
+      }
+
+      appendItem(new HTML("<div style='background-color: #eaeaea; width:100%;'> * "
+              + sanitizeHtml(nick).asString() + " "
+              + sanitizeHtml(message).asString() + "</div>").getElement());
+    }
+    else {
+      appendItem(new HTML(" * " + sanitizeHtml(nick).asString() + " "
+              + sanitizeHtml(message).asString()
               + "<br/>").getElement());
     }
   }
@@ -92,11 +122,59 @@ public class ChatBox extends Composite {
 
   @UiHandler("sendMessage")
   public void onClick(ClickEvent event) {
-    if (textEntry.getText().trim().length() > 0) {
-      chatMessageEvent.fire(new ChatMessage(new Date(), sessionData.getNickName(), textEntry.getText()));
-      appendItem(new HTML("<span style='color:blue'><strong>" + sessionData.getNickName() + "</strong>: " +
-              sanitizeHtml(textEntry.getText()).asString() + "</span>").getElement());
+    final String text = textEntry.getText().trim();
+    if (text.length() > 0) {
+      if (text.startsWith("/me ")) {
+        String actionMessage = text.substring("/me ".length());
+        actionMessageEvent.fire(new ActionMessage(new Date(), sessionData.getNickName(), actionMessage));
+        appendItem(new HTML("<span style='color:blue'> * " + sessionData.getNickName() + " "
+                + sanitizeHtml(actionMessage).asString() + "</span><br/>").getElement());
+      }
+      else if (text.startsWith("/auth ")) {
+        String[] commandParts = text.split(" ");
+        if (expectParms(1, commandParts)) {
+          adminAuthEvent.fire(new AdminAuth(commandParts[1]));
+        }
+      }
+      else if (text.startsWith("/op ")) {
+        String[] commandParts = text.split(" ");
+        if (expectParms(1, commandParts)) {
+         adminActionEvent.fire(new AdminAction(Action.Op, commandParts[1]));
+        }
+      }
+      else if (text.startsWith("/deop ")){
+        String[] commandParts = text.split(" ");
+        if (expectParms(1, commandParts)) {
+         adminActionEvent.fire(new AdminAction(Action.Deop, commandParts[1]));
+        }
+      }
+      else if (text.startsWith("/kick ")){
+        String[] commandParts = text.split(" ");
+        if (expectParms(1, commandParts)) {
+         adminActionEvent.fire(new AdminAction(Action.Kick, commandParts[1]));
+        }
+      }
+      else if (text.startsWith("/topic ")){
+         adminActionEvent.fire(new AdminAction(Action.Topic, text.substring("/topic ".length())));
+      }
+      else {
+        chatMessageEvent.fire(new ChatMessage(new Date(), sessionData.getNickName(), text));
+        appendItem(new HTML("<span style='color:blue'><strong>"
+                + sessionData.getNickName() + "</strong>: " +
+                sanitizeHtml(text).asString() + "</span><br/>").getElement());
+      }
       textEntry.setText("");
+    }
+  }
+
+  private static boolean expectParms(int num, String[] parms) {
+    if (num + 1 != parms.length) {
+      Window.alert("Incorrect number of parameters (Expected: " + num + ")");
+
+      return false;
+    }
+    else {
+      return true;
     }
   }
 
@@ -107,6 +185,7 @@ public class ChatBox extends Composite {
   private void updateStatus() {
     statusSummary.setText("Logged in users: " + sessionData.getLoggedInUsers().size());
   }
+
 
   private void appendItem(Element element) {
     chatBox.getElement().appendChild(element);
